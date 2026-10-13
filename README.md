@@ -1,3 +1,5 @@
+Berikut adalah kode Markdown yang sudah diperbaiki dan siap untuk langsung disalin ke dalam file `README.md` di GitHub Anda. Saya telah merapikan struktur direktori dan alur kerja (workflow) menggunakan *code block* agar tidak rusak saat dirender oleh GitHub.
+
 ```markdown
 # Deep Learning Facial Landmark Detection
 
@@ -19,142 +21,143 @@ This project focuses on developing a deep learning model capable of predicting 4
 
 ## Dataset
 
-Dataset: Microsoft FaceSynthetics
+**Dataset:** Microsoft FaceSynthetics
 
-Characteristics:
-
+**Characteristics:**
 - Type: Synthetic facial image dataset
 - Task: Facial landmark detection
 - Number of landmarks: 478 points
 - Annotation format: Normalized 3D coordinates
 - Image format: PNG
 
-Dataset components:
-
-```
+**Dataset components:**
+```text
 FaceSynthetics/
-├── Images
-├── Landmark annotations
-└── Segmentation masks
+├── Images/
+├── Landmark annotations/
+└── Segmentation masks/
+
 ```
 
 ## Project Workflow
 
-```
-Dataset Preparation
-        |
-        v
-Annotation Processing
-        |
-        v
-Data Preprocessing
-        |
-        v
-Model Development
-        |
-        v
-Model Training
-        |
-        v
-Model Evaluation
-        |
-        v
-Result Analysis
+The project workflow consists of the following stages:
+
+```text
+1. Dataset Preparation
+          |
+          v
+2. Annotation Processing
+          |
+          v
+3. Data Preprocessing
+          |
+          v
+4. Model Development
+          |
+          v
+5. Model Training
+          |
+          v
+6. Model Evaluation
+          |
+          v
+7. Result Analysis
+
 ```
 
 ## Current Progress
 
-Completed:
+### Completed
 
-- Dataset exploration and validation.
-- Verification of FaceSynthetics dataset structure.
-- Extraction and validation of facial landmark annotations.
-- Preparation of dataset subset for experimentation.
-- Visualization of facial landmark coordinates.
+* [x] Dataset exploration and validation.
+* [x] Verification of FaceSynthetics dataset structure.
+* [x] Extraction and validation of facial landmark annotations.
+* [x] Preparation of dataset subset for experimentation.
+* [x] Visualization of facial landmark coordinates.
 
-Next Steps:
+### Next Steps
 
-- Design deep learning architecture.
-- Build training pipeline.
-- Train and evaluate the model.
-- Optimize model performance.
+* [ ] Design deep learning architecture.
+* [ ] Build training pipeline.
+* [ ] Train and evaluate the model.
+* [ ] Optimize model performance.
 
 ## Technology Stack
 
 ### Programming Language
 
-- Python
+* Python
 
 ### Libraries
 
-- PyTorch / TensorFlow
-- OpenCV
-- NumPy
-- Pandas
-- Matplotlib
+* PyTorch / TensorFlow
+* OpenCV
+* NumPy
+* Pandas
+* Matplotlib
 
 ### Development Environment
 
-- Visual Studio Code
-- Antigravity Coding Agent
+* Visual Studio Code
+* Antigravity Coding Agent
 
 ## Repository Structure
 
-```
+```text
 deep-learning-facial-landmark-detection/
-
 ├── docs/
 │   ├── SRS.md
 │   ├── TDD.md
 │   ├── DATASET.md
 │   └── EXPERIMENT_PLAN.md
-│
 ├── src/
 │   ├── dataset/
 │   ├── models/
 │   ├── training/
 │   └── evaluation/
-│
 ├── notebooks/
 ├── configs/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+
 ```
 
 ## Expected Output
 
 The final model is expected to:
 
-- Receive facial images as input.
-- Predict 478 facial landmark coordinates.
-- Visualize detected facial keypoints.
-- Provide evaluation results.
+* Receive facial images as input.
+* Predict 478 facial landmark coordinates.
+* Visualize detected facial keypoints.
+* Provide evaluation results.
 
 ## Evaluation Metrics
 
 The model will be evaluated using:
 
-- Mean Squared Error (MSE)
-- Mean Absolute Error (MAE)
-- Normalized Mean Error (NME)
-- Landmark localization accuracy
+* Mean Squared Error (MSE)
+* Mean Absolute Error (MAE)
+* Normalized Mean Error (NME)
+* Landmark localization accuracy
 
 ## Future Development
 
-- Experiment with different deep learning architectures.
-- Apply data augmentation techniques.
-- Improve inference performance.
-- Compare different model approaches.
-- Develop real-time facial landmark detection applications.
+* Experiment with different deep learning architectures.
+* Apply data augmentation techniques.
+* Improve inference performance.
+* Compare different model approaches.
+* Develop real-time facial landmark detection applications.
 
 ## References
 
-Microsoft FaceSynthetics Dataset:
-
-https://github.com/microsoft/FaceSynthetics
+* **Microsoft FaceSynthetics Dataset:** [GitHub Repository](https://github.com/microsoft/FaceSynthetics)
 
 ## Contributors
 
 Deep Learning Course Project
+
+```
+
 ```
