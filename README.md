@@ -1,143 +1,143 @@
-# Deep Learning Facial Landmark Detection
+# Thermal Facial Landmark Detection
 
-A deep learning project for detecting 478 facial landmark points from facial images using the Microsoft FaceSynthetics and T-FAKE datasets.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0%2Bcu124-EE4C2C.svg)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.4-green.svg)](https://developer.nvidia.com/cuda-toolkit)
+[![License](https://img.shields.io/badge/License-Academic-lightgrey.svg)]()
+
+A deep learning project for detecting **478 3D facial landmark coordinates** $(x, y, z)$ on thermal facial imagery, incorporating domain adaptation principles from the **Microsoft FaceSynthetics** and **T-FAKE** datasets.
+
+---
 
 ## Overview
 
-Facial landmark detection is a computer vision task that aims to identify key facial points such as eyes, eyebrows, nose, mouth, and facial contours.
+Facial landmark localization in thermal imaging plays a vital role in medical diagnostic screening, contact-free temperature monitoring, night-time driver assistance, and low-light biometrics. However, thermal facial imagery lacks high-frequency visual textures and large-scale 3D landmark annotations.
 
-This project focuses on developing a deep learning model capable of predicting 478 3D facial landmark coordinates from facial images, with support for both visible RGB imagery and thermal imagery (T-FAKE).
+This repository implements an end-to-end deep learning framework designed to predict 478 dense 3D facial keypoints directly from thermal imagery. The pipeline leverages synthetic thermalization (**T-FAKE**) paired with ground truth 3D landmark coordinates to train and evaluate lightweight CNN architectures.
 
-## Objectives
+---
 
-- Develop a deep learning model for facial landmark detection.
-- Process and utilize the Microsoft FaceSynthetics (P1) and T-FAKE datasets.
-- Predict 478 facial landmark coordinates (x, y, z) from input facial images.
-- Evaluate model performance using appropriate evaluation metrics (NME, MAE, MSE).
-- Analyze the effectiveness of deep learning approaches for facial keypoint localization across RGB and Thermal domains.
+## Datasets
 
-## Dataset
+The project uses a paired cross-domain dataset structure sharing a unified 3D landmark ground truth:
 
-* **FaceSynthetics (Subset P1):** Synthetic RGB facial image dataset.
-* **T-FAKE (`T-FAKE-warm`):** Synthesized 16-bit thermal facial image dataset.
-* **Task:** Facial landmark detection (478 keypoints 3D).
-* **Annotation format:** Normalized 3D coordinates `(x, y, z)`.
+| Dataset Component | Modality | Resolution | Format | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **T-FAKE (`T-FAKE-warm`)** | Thermal | $512 \times 512$ | 16-bit PNG (`I;16`) | Primary target domain; synthesized thermal facial images with radiometric intensity. |
+| **FaceSynthetics (P1)** | Visible RGB | $512 \times 512$ | 8-bit RGB PNG | Source domain; used for baseline comparisons and cross-domain gap analysis. |
+| **Annotations (`annotations_P1.pkl`)** | Ground Truth | N/A | Pickle (`dict`) | 478 3D coordinates $(x, y, z)$ per sample, normalized to $[0, 1]$. |
 
-## Project Workflow
+---
+
+## Methodology & Architecture
 
 ```text
-1. Dataset Preparation & Alignment (RGB & Thermal)
-          |
-          v
-2. Annotation Processing & Split (Train / Val / Test)
-          |
-          v
-3. Data Preprocessing & Radiometric Normalization
-          |
-          v
-4. Model Development (MobileNetV2 Backbone + Regression Head)
-          |
-          v
-5. Model Training (Smooth L1 Loss, AMP FP16, AdamW)
-          |
-          v
-6. Model Evaluation (NME, MAE, MSE)
-          |
-          v
-7. Qualitative Visualization & Cross-Domain Analysis
+[Input Image (512x512)]
+          │
+          ▼
+[Radiometric Scaling & Resize (224x224x3)]
+          │
+          ▼
+[MobileNetV2 Feature Extractor (Pretrained)]
+          │
+          ▼
+[Adaptive AvgPool + Dropout (0.2)]
+          │
+          ▼
+[Linear Regression Head (1434 Outputs)]
+          │
+          ▼
+[Predicted 3D Landmarks: 478 Keypoints (x, y, z)]
 ```
 
-## Current Progress
+* **Backbone:** MobileNetV2 with ImageNet-pretrained weights for fast convergence and low memory footprint.
+* **Loss Function:** Smooth L1 Loss (Huber Loss, $\beta = 1.0$) for robust coordinate regression.
+* **Optimization:** AdamW optimizer with Cosine Annealing learning rate scheduling.
+* **Precision:** Automatic Mixed Precision (AMP FP16) accelerated by NVIDIA CUDA.
 
-### Completed
-* [x] Dataset exploration, extraction, and validation.
-* [x] Integration of FaceSynthetics P1 (RGB) and T-FAKE-warm (Thermal) datasets.
-* [x] Extraction and validation of 478 facial landmark annotations (948 paired samples).
-* [x] Deterministic data partitioning (`dataset/processed/splits.json`, Seed 42).
-* [x] Complete modular software architecture in `src/` (datasets, models, training, evaluation, utils).
-* [x] Automated CLI training and evaluation scripts (`train.py`, `evaluate.py`).
-* [x] Comprehensive research documentation in `docs/` and team workload division in `docs/progress/`.
-
-### Next Steps
-* [ ] Execute baseline model training (EXP-001).
-* [ ] Execute cross-domain RGB vs Thermal gap analysis (EXP-002).
-* [ ] Explore loss function optimization and thermal data augmentation (EXP-004 / EXP-005).
-
-## Technology Stack
-
-### Programming Language
-* Python 3.13
-
-### Frameworks & Libraries
-* PyTorch 2.6.0 + CUDA 12.4
-* TorchVision 0.21.0
-* OpenCV
-* Pillow
-* NumPy
-* SciPy
-* Pandas
-* scikit-learn
-* Matplotlib
-* tqdm
-
-### Development Environment
-* Visual Studio Code
-* NVIDIA GeForce RTX 3050 Laptop GPU (6 GB VRAM)
+---
 
 ## Repository Structure
 
 ```text
 facial-landmark-detection/
-├── docs/                               # Project documentation & team progress
-│   ├── 01_Project_Context.md
-│   ├── 02_Software_Requirement_Specification.md
-│   ├── 03_Technical_Design_Document.md
-│   ├── 04_Machine_Learning_Design_Document.md
-│   ├── 05_Dataset_Documentation.md
-│   ├── 06_Experiment_Plan.md
-│   ├── 07_Project_Log.md
-│   ├── 08_Dataset_and_Setup_Summary.md
-│   └── progress/                       # Team agent action guides
-│       ├── person_1.md
-│       ├── person_2.md
-│       └── person_3.md
+├── docs/                   # System design, requirement specs, and dataset documentation
 ├── dataset/
-│   ├── raw/
-│   │   ├── P1/                         # RGB images
-│   │   └── T-FAKE-warm/                # Thermal images
-│   └── processed/
-│       ├── annotations/
-│       │   └── annotations_P1.pkl      # 478 3D landmark annotations
-│       └── splits.json                 # Deterministic data splits
+│   ├── raw/                # Source RGB (P1) and Thermal (T-FAKE-warm) image files
+│   └── processed/          # 3D annotations and deterministic data splits
 ├── src/
-│   ├── datasets/                       # Dataset class, transforms, dataloader
-│   ├── models/                         # MobileNetV2 architecture & regression head
-│   ├── training/                       # Trainer engine, loss, optimizer
-│   ├── evaluation/                     # Evaluation metrics (NME, MAE, MSE)
-│   └── utils/                          # Visualizer, seed, split utilities
-├── checkpoints/                        # Model weights (.pth)
-├── experiments/                        # Experiment logs & metrics history
-├── outputs/                            # Visual prediction overlays & plots
-├── requirements.txt                    # Project dependencies
-├── train.py                            # Main training script
-├── evaluate.py                         # Standalone evaluation script
-├── .gitignore                          # Git ignore rules
-└── README.md                           # Main repository documentation
+│   ├── datasets/           # PyTorch Dataset, transforms, and DataLoader pipeline
+│   ├── models/             # MobileNetV2 landmark detection model definition
+│   ├── training/           # Training engine, loss functions, and optimization loops
+│   ├── evaluation/         # Evaluation metrics (NME, MAE, MSE)
+│   └── utils/              # Landmark visualizer and deterministic seed utilities
+├── checkpoints/            # Model checkpoint weights (.pth)
+├── experiments/            # Training history logs and experiment reports
+├── outputs/                # Qualitative prediction overlays and visualization plots
+├── requirements.txt        # Project dependencies
+├── train.py                # Command-line training entrypoint
+└── evaluate.py             # Standalone test evaluation and visualization runner
 ```
 
-## Expected Output
+---
 
-The final model is expected to:
-* Receive facial images (Thermal or RGB) as input.
-* Predict 478 3D facial landmark coordinates $(x, y, z)$.
-* Visualize detected facial keypoints overlaid on thermal/RGB faces.
-* Provide comprehensive evaluation metrics (NME, MAE, MSE).
+## Quickstart
+
+### 1. Installation
+
+Ensure Python 3.10+ and CUDA drivers are configured, then install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Training
+
+Train the baseline MobileNetV2 model on thermal imagery:
+
+```bash
+python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --experiment_id EXP-001
+```
+
+*Arguments:*
+* `--mode`: Input domain (`thermal` or `rgb`).
+* `--epochs`: Maximum number of training epochs (default: `50`).
+* `--batch_size`: Batch size (default: `16`).
+* `--lr`: Initial learning rate (default: `5e-4`).
+* `--patience`: Early stopping patience (default: `10`).
+
+### 3. Evaluation
+
+Evaluate a saved checkpoint against the independent test set:
+
+```bash
+python evaluate.py --checkpoint checkpoints/EXP-001_best.pth --mode thermal
+```
+
+Qualitative overlay plots for best and worst predictions are automatically exported to `outputs/predictions/`.
+
+---
+
+## Evaluation Metrics
+
+Model accuracy is evaluated across spatial coordinates and depth:
+
+* **Normalized Mean Error (NME):** Normalized Euclidean landmark distance:
+  $$\text{NME} = \frac{1}{N} \sum_{i=1}^{N} \left( \frac{\frac{1}{478} \sum_{j=1}^{478} \| p_j - \hat{p}_j \|_2}{d_{\text{norm}}} \right) \times 100\%$$
+* **Mean Absolute Error (MAE):** Reported across total coordinates, 2D spatial plane $(x, y)$, and depth axis $(z)$.
+* **Mean Squared Error (MSE):** Standard variance benchmark metric.
+
+---
 
 ## References
 
-* **Microsoft FaceSynthetics Dataset:** [GitHub Repository](https://github.com/microsoft/FaceSynthetics)
-* **T-FAKE: Synthesizing Thermal Images for Facial Landmarking:** Flotho et al. (2024), [arXiv:2408.15127](https://arxiv.org/html/2408.15127v1)
+* **T-FAKE: Synthesizing Thermal Images for Facial Landmarking:**  
+  Philipp Flotho, Moritz Piening, Anna Kukleva, Gabriele Steidl (2024). [arXiv:2408.15127](https://arxiv.org/html/2408.15127v1).
+* **Microsoft FaceSynthetics:**  
+  Erroll Wood et al. *"Fake It Till You Make It: Face analysis in the wild using synthetic data alone"* (ICCV 2021). [GitHub](https://github.com/microsoft/FaceSynthetics).
 
-## Contributors
+---
 
-Deep Learning Course Project Team
+## License
+
+This project is developed for academic research purposes.
