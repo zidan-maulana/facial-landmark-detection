@@ -48,6 +48,12 @@ outputs/screenshots/
 outputs/debug_*
 outputs/test_*
 
+# Comprehensive Project Report
+PROJECT_REPORT_COMPREHENSIVE.md
+
+# Progress Documentation (Untracked)
+docs/progress/
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 

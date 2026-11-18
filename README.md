@@ -74,6 +74,7 @@ facial-landmark-detection/
 ├── checkpoints/            # Model checkpoint weights (.pth)
 ├── experiments/            # Training history logs and experiment reports
 ├── outputs/                # Qualitative prediction overlays and visualization plots
+├── demo_thermal.py         # Standalone interactive pure PyTorch thermal demo
 ├── requirements.txt        # Project dependencies
 ├── train.py                # Command-line training entrypoint
 └── evaluate.py             # Standalone test evaluation and visualization runner
