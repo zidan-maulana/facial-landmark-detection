@@ -135,34 +135,25 @@ python evaluate.py --checkpoint checkpoints/EXP-004_wing_best.pth --mode thermal
 
 Qualitative overlay plots for best and worst predictions are automatically exported to `outputs/predictions/`.
 
-### 4. Real-Time Webcam Demo & Domain Adaptation
+### 4. Interactive Thermal Landmark Demo
 
-Run real-time facial landmark detection directly from your laptop's built-in webcam with live radiometric thermal simulation, YuNet face detection, and MediaPipe SOTA Teacher baseline:
-
-**Run Demo:**
+Run an interactive thermal facial landmark detection demo powered 100% by our trained PyTorch neural networks (zero external APIs, zero MediaPipe, zero simulated camera filters):
 
 ```bash
-# Menjalankan Demo Real-Time (Mendukung MediaPipe SOTA & Model PyTorch)
-python demo_realtime.py
+# Menjalankan Demo Interaktif Citra Termal Murni
+python demo_thermal.py
 ```
 
 *Interactive Controls:*
-* `b`: Hot-swap active model (`MEDIAPIPE SOTA` (100% presisi wajah nyata) $\leftrightarrow$ `PYTORCH RGB STUDENT` $\leftrightarrow$ `PYTORCH TERMAL WING` $\leftrightarrow$ `DUAL COMPARE` (Cyan=MediaPipe vs Hijau=PyTorch)).
-* `t`: Toggle visual display mode (`Thermal Monochrome` $\leftrightarrow$ `Ironbow Colormap` $\leftrightarrow$ `Original RGB`).
-* `m`: Toggle landmark density (`Dense 478 Mesh` $\leftrightarrow$ `12 Key Anatomical Points`).
-* `g`: Toggle face detection bounding box visibility.
-* `s`: Save instant screenshot to `outputs/screenshots/`.
-* `q`: Quit demo.
-
-### 5. Knowledge Distillation: Synthetic-to-Real Fine-Tuning (EXP-006)
-
-To bridge the synthetic-to-real domain gap on live camera frames without storing sensitive images to disk:
-
-```bash
-# Kalibrasi fine-tuning berbasis pseudo-label MediaPipe di memori RAM/GPU (~15 detik):
-python finetune_real.py --epochs 8 --num_samples 60
-```
-Hasil model tersimpan di `checkpoints/EXP-006_finetuned_real.pth` dan langsung dapat dipilih di `demo_realtime.py`.
+* `[d]` / `[Right Arrow]`: Next thermal subject / pose.
+* `[a]` / `[Left Arrow]`: Previous thermal subject / pose.
+* `[Space]`: Toggle Auto-Play streaming mode (continuous 15–30 FPS thermal video stream).
+* `[b]`: Hot-swap active PyTorch model (`EXP-004 Wing Loss SOTA` $\leftrightarrow$ `EXP-001 Baseline` $\leftrightarrow$ `EXP-003 ResNet-18` $\leftrightarrow$ `EXP-002 RGB Cross-Domain`).
+* `[g]`: Toggle Ground Truth comparison overlay (Green = Ground Truth, Red = Model Prediction) with per-sample NME score.
+* `[c]`: Toggle colormap (`FLIR Inferno` $\leftrightarrow$ `Thermal Monochrome`).
+* `[m]`: Toggle landmark density (`478 Dense Mesh` $\leftrightarrow$ `12 Key Anatomical Points`).
+* `[s]`: Save instant screenshot to `outputs/screenshots/`.
+* `[q]`: Quit demo.
 
 ---
 
