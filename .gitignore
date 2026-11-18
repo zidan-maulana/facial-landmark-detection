@@ -36,8 +36,9 @@ dataset/raw/
 # Model Checkpoints (Heavy Binary Weights)
 checkpoints/*.pth
 
-# Face Detection Model (Binary)
+# Face Detection & Landmark Models (Binary)
 models/*.onnx
+models/*.task
 
 # Generated Predictions & Screenshots
 outputs/predictions/

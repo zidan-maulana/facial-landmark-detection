@@ -135,36 +135,34 @@ python evaluate.py --checkpoint checkpoints/EXP-004_wing_best.pth --mode thermal
 
 Qualitative overlay plots for best and worst predictions are automatically exported to `outputs/predictions/`.
 
-### 4. Real-Time Webcam Demo
+### 4. Real-Time Webcam Demo & Domain Adaptation
 
-Run real-time facial landmark detection directly from your laptop's built-in webcam with live radiometric thermal simulation and automatic face detection:
-
-**Setup:** Download the YuNet face detection model (required for face auto-crop):
-
-```bash
-mkdir models
-# Download from OpenCV Zoo:
-# https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet
-# Save as: models/face_detection_yunet_2023mar.onnx
-```
+Run real-time facial landmark detection directly from your laptop's built-in webcam with live radiometric thermal simulation, YuNet face detection, and MediaPipe SOTA Teacher baseline:
 
 **Run Demo:**
 
 ```bash
-# Mode RGB (Recommended untuk webcam biasa)
-python demo_realtime.py --checkpoint checkpoints/EXP-002_rgb_best.pth
-
-# Mode Termal (Wing Loss - Best Model)
-python demo_realtime.py --checkpoint checkpoints/EXP-004_wing_best.pth
+# Menjalankan Demo Real-Time (Mendukung MediaPipe SOTA & Model PyTorch)
+python demo_realtime.py
 ```
 
 *Interactive Controls:*
-* `b`: Hot-swap active model (RGB Native $\leftrightarrow$ Thermal Wing Loss $\leftrightarrow$ Thermal Baseline).
-* `t`: Toggle display mode (Thermal Monochrome $\leftrightarrow$ Ironbow Colormap $\leftrightarrow$ Original RGB).
-* `m`: Toggle landmark density (Dense 478 Mesh $\leftrightarrow$ Key Anatomical Points).
+* `b`: Hot-swap active model (`MEDIAPIPE SOTA` (100% presisi wajah nyata) $\leftrightarrow$ `PYTORCH RGB STUDENT` $\leftrightarrow$ `PYTORCH TERMAL WING` $\leftrightarrow$ `DUAL COMPARE` (Cyan=MediaPipe vs Hijau=PyTorch)).
+* `t`: Toggle visual display mode (`Thermal Monochrome` $\leftrightarrow$ `Ironbow Colormap` $\leftrightarrow$ `Original RGB`).
+* `m`: Toggle landmark density (`Dense 478 Mesh` $\leftrightarrow$ `12 Key Anatomical Points`).
 * `g`: Toggle face detection bounding box visibility.
 * `s`: Save instant screenshot to `outputs/screenshots/`.
 * `q`: Quit demo.
+
+### 5. Knowledge Distillation: Synthetic-to-Real Fine-Tuning (EXP-006)
+
+To bridge the synthetic-to-real domain gap on live camera frames without storing sensitive images to disk:
+
+```bash
+# Kalibrasi fine-tuning berbasis pseudo-label MediaPipe di memori RAM/GPU (~15 detik):
+python finetune_real.py --epochs 8 --num_samples 60
+```
+Hasil model tersimpan di `checkpoints/EXP-006_finetuned_real.pth` dan langsung dapat dipilih di `demo_realtime.py`.
 
 ---
 
