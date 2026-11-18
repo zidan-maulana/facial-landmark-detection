@@ -6,19 +6,23 @@ Menjalankan pipeline pelatihan MobileNetV2 untuk Thermal Landmark Detection seca
 import argparse
 import torch
 from src.datasets.dataloader import get_dataloaders
-from src.models.landmark_detector import MobileNetV2LandmarkDetector
+from src.models.landmark_detector import build_model
 from src.training.trainer import Trainer
+from src.training.losses import WingLoss, AdaptiveWingLoss
 from src.utils.seed import set_seed
 
 
 def parse_args():
     """Mendefinisikan argumen baris perintah (CLI parameters)."""
     parser = argparse.ArgumentParser(description="Pelatihan Model Thermal Facial Landmark Detection")
+    parser.add_argument("--arch", type=str, default="mobilenet_v2", choices=["mobilenet_v2", "resnet18"], help="Arsitektur backbone (default: mobilenet_v2)")
     parser.add_argument("--mode", type=str, default="thermal", choices=["thermal", "rgb"], help="Domain input citra (default: thermal)")
+    parser.add_argument("--loss", type=str, default="smooth_l1", choices=["smooth_l1", "wing", "adaptive_wing"], help="Fungsi loss untuk optimasi (default: smooth_l1)")
     parser.add_argument("--epochs", type=int, default=50, help="Jumlah maksimum epoch pelatihan (default: 50)")
     parser.add_argument("--batch_size", type=int, default=16, help="Ukuran batch data per iterasi (default: 16)")
     parser.add_argument("--lr", type=float, default=5e-4, help="Initial learning rate untuk optimizer (default: 5e-4)")
     parser.add_argument("--patience", type=int, default=10, help="Patience untuk early stopping (default: 10)")
+    parser.add_argument("--augment", action="store_true", default=False, help="Aktifkan thermal photometric data augmentation")
     parser.add_argument("--experiment_id", type=str, default="EXP-001", help="Identifier unik untuk eksperimen ini (default: EXP-001)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed untuk reproducibility (default: 42)")
     return parser.parse_args()
@@ -29,7 +33,8 @@ def main():
     args = parse_args()
     print("=" * 60)
     print(f" Memulai Eksperimen: {args.experiment_id}")
-    print(f" Mode: {args.mode.upper()} | Epochs: {args.epochs} | Batch: {args.batch_size} | LR: {args.lr}")
+    print(f" Arsitektur: {args.arch} | Mode: {args.mode.upper()}")
+    print(f" Epochs: {args.epochs} | Batch: {args.batch_size} | LR: {args.lr}")
     print("=" * 60)
 
     # 2. Mengunci random seed global untuk keterulangan hasil (reproducibility)
@@ -47,26 +52,40 @@ def main():
         splits_path="dataset/processed/splits.json",
         annotation_path="dataset/processed/annotations/annotations_P1.pkl",
         mode=args.mode,
-        batch_size=args.batch_size
+        batch_size=args.batch_size,
+        augment=args.augment
     )
     print(f"  - Sampel Train : {len(train_loader.dataset)} citra ({len(train_loader)} batches)")
     print(f"  - Sampel Val   : {len(val_loader.dataset)} citra ({len(val_loader)} batches)")
     print(f"  - Sampel Test  : {len(test_loader.dataset)} citra ({len(test_loader)} batches)")
 
-    # 5. Inisialisasi Arsitektur Model MobileNetV2
-    print("\n[2/3] Membangun Model MobileNetV2...")
-    model = MobileNetV2LandmarkDetector(
+    # 5. Inisialisasi Arsitektur Model (MobileNetV2 / ResNet-18)
+    print(f"\n[2/3] Membangun Model ({args.arch})...")
+    model = build_model(
+        arch=args.arch,
         num_landmarks=478,
         pretrained=True,
         dropout_rate=0.2
     )
 
-    # 6. Menjalankan Siklus Pelatihan via Trainer
+    # 6. Menentukan Fungsi Loss (Smooth L1 / Wing Loss / Adaptive Wing Loss)
+    if args.loss == "wing":
+        criterion = WingLoss()
+        print("Fungsi Loss: Wing Loss (Feng et al., CVPR 2018)")
+    elif args.loss == "adaptive_wing":
+        criterion = AdaptiveWingLoss()
+        print("Fungsi Loss: Adaptive Wing Loss (Wang et al., ICCV 2019)")
+    else:
+        criterion = torch.nn.SmoothL1Loss()
+        print("Fungsi Loss: Smooth L1 Loss (Default)")
+
+    # 7. Menjalankan Siklus Pelatihan via Trainer
     print("\n[3/3] Menginisialisasi Trainer Engine...")
     trainer = Trainer(
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
+        criterion=criterion,
         device=device,
         experiment_id=args.experiment_id
     )

@@ -6,6 +6,7 @@ Mengorganisir Train, Validation, dan Test DataLoader berdasarkan konfigurasi spl
 import json
 import os
 from src.datasets.face_dataset import FaceLandmarkDataset
+from src.datasets.transforms import AugmentedThermalTransform, ThermalTransform, RGBTransform
 
 
 def get_dataloaders(
@@ -15,11 +16,13 @@ def get_dataloaders(
     rgb_dir: str = "dataset/raw/P1",
     mode: str = "thermal",
     batch_size: int = 16,
+    augment: bool = False,
     num_workers: int = 0,
     pin_memory: bool = True
 ):
     """
     Membangun tiga DataLoader (Train, Validation, Test) secara deterministik.
+    Jika augment=True dan mode='thermal', subset Train akan menerapkan variasi radiometrik on-the-fly.
     """
     # 1. Mengimpor modul PyTorch DataLoader
     from torch.utils.data import DataLoader
@@ -34,12 +37,18 @@ def get_dataloaders(
     # 3. Menentukan direktori gambar berdasarkan mode
     image_dir = thermal_dir if mode == "thermal" else rgb_dir
 
+    # Transformasi khusus train jika augmentasi diaktifkan
+    train_transform = None
+    if augment and mode == "thermal":
+        train_transform = AugmentedThermalTransform()
+
     # 4. Inisialisasi Dataset untuk masing-masing subset
     train_dataset = FaceLandmarkDataset(
         annotation_path=annotation_path,
         image_dir=image_dir,
         sample_keys=splits["train"],
-        mode=mode
+        mode=mode,
+        transform=train_transform
     )
 
     val_dataset = FaceLandmarkDataset(

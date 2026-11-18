@@ -37,7 +37,7 @@ Anda bertanggung jawab sebagai **Model Architecture & Baseline Lead**. Tugas uta
 
 ## 3. Rencana Eksekusi Bertahap (Step-by-Step)
 
-### Tahap 1: Eksekusi Baseline Model (EXP-001)
+### Tahap 1: Eksekusi Baseline Model (EXP-001) [SELESAI - 2026-11-18]
 1. Jalankan training MobileNetV2 pada citra termal:
    ```bash
    python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-001
@@ -46,17 +46,42 @@ Anda bertanggung jawab sebagai **Model Architecture & Baseline Lead**. Tugas uta
    ```bash
    python evaluate.py --checkpoint checkpoints/EXP-001_best.pth --mode thermal --batch_size 16
    ```
-3. Catat nilai metrik akhir: NME (%), MAE total, MAE (x, y), MAE (z), dan MSE ke dalam tabel ringkasan.
+3. Hasil Metrik Akhir Test Set (EXP-001 Baseline):
+   * **Normalized Mean Error (NME):** 7.98%
+   * **Mean Absolute Error (Total):** 0.01896
+   * **MAE (XY Spasial):** 0.02249
+   * **MAE (Z Depth):** 0.01191
+   * **Mean Squared Error (MSE):** 0.001200
+   * **Status:** Berhasil melampaui target toleransi (NME < 10%).
 
-### Tahap 2: Eksplorasi Arsitektur Pembanding (EXP-003)
-1. Buat variasi model baru di `src/models/` (misalnya ResNet-18 dengan regression head 1434 output).
-2. Latih model pembanding tersebut dengan konfigurasi hyperparameter yang identik:
+### Tahap 2: Eksplorasi Arsitektur Pembanding (EXP-003) [SELESAI - 2026-11-18]
+1. Jalankan training ResNet-18 pada citra termal:
    ```bash
-   python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-003
+   python train.py --arch resnet18 --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-003
    ```
-3. Evaluasi performa ResNet-18 pada Test Set yang sama.
-4. Buat tabel perbandingan komprehensif antara MobileNetV2 vs ResNet-18:
-   * Parameter: Jumlah Parameter, Ukuran Checkpoint, Waktu Inferensi per Batch, Test NME, Test MAE.
+2. Jalankan evaluasi kuantitatif pada test set:
+   ```bash
+   python evaluate.py --checkpoint checkpoints/EXP-003_best.pth --mode thermal --batch_size 16
+   ```
+3. Hasil Metrik Akhir Test Set (EXP-003 ResNet-18):
+   * **Normalized Mean Error (NME):** 6.95%
+   * **Mean Absolute Error (Total):** 0.01736
+   * **MAE (XY Spasial):** 0.01974
+   * **MAE (Z Depth):** 0.01261
+   * **Mean Squared Error (MSE):** 0.001060
+   * **Status:** Berhasil melampaui MobileNetV2 (NME 6.95% vs 7.98%, peningkatan akurasi relatif 12.9%).
+
+### Ringkasan Komparasi Person 1 (EXP-001 vs EXP-003)
+
+| Parameter / Metrik | EXP-001 (MobileNetV2) | EXP-003 (ResNet-18) | Selisih / Analisis |
+| :--- | :--- | :--- | :--- |
+| **Jumlah Parameter** | ~4.06M | ~11.91M | ResNet-18 ~3x lebih besar |
+| **Test NME (%)** | **7.98%** | **6.95%** | ResNet-18 lebih akurat (-1.03%) |
+| **Test MAE Total** | **0.01896** | **0.01736** | Error absolut berkurang |
+| **Test MAE (XY)** | **0.02249** | **0.01974** | Koordinat bidang wajah lebih presisi |
+| **Test MAE (Z)** | **0.01191** | **0.01261** | MobileNetV2 sedikit lebih unggul di estimasi depth |
+| **Test MSE** | **0.001200** | **0.001060** | Varian residual error lebih kecil |
+| **Trade-off** | Ringan, efisien, ramah CPU/mobile | Kapasitas representasi fitur spasial lebih kaya |
 
 ---
 

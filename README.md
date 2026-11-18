@@ -81,6 +81,25 @@ facial-landmark-detection/
 
 ---
 
+## Experimental Benchmark Results
+
+Quantitative evaluation on the independent test partition (96 thermal images, fixed seed 42):
+
+| Experiment ID | Architecture | Training Domain | Loss Function | Technique / Focus | Test NME (%) | Test MAE | Test MSE |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **EXP-004** | MobileNetV2 (~4.06M) | Thermal | **Wing Loss** | Logarithmic Gradient Scaling | **5.32%** | **0.01265** | **0.000903** |
+| **EXP-005** | MobileNetV2 (~4.06M) | Thermal | Smooth L1 | Thermal Photometric Augmentation | **6.81%** | **0.01621** | **0.001258** |
+| **EXP-003** | ResNet-18 (~11.91M) | Thermal | Smooth L1 | Residual Skip Connections | **6.95%** | **0.01736** | **0.001060** |
+| **EXP-001** | MobileNetV2 (~4.06M) | Thermal | Smooth L1 | Baseline Control Model | **7.98%** | **0.01896** | **0.001200** |
+| **EXP-002 (B)**| MobileNetV2 (~4.06M) | Visible RGB | Smooth L1 | Direct Cross-Domain (No Adaptation) | **42.57%** | **0.09795** | **0.016060** |
+
+### Key Scientific Findings:
+1. **Closing the Domain Gap (EXP-002):** Direct transfer of an RGB-trained model to thermal imagery results in catastrophic performance degradation (**42.57% NME**). Training on synthetic thermal data (**T-FAKE**) recovers accuracy to **7.98%** (**81.25% error reduction**), proving the necessity of thermal-domain learning.
+2. **Wing Loss Superiority (EXP-004):** Applying Wing Loss amplifies gradients on small errors ($|x| < 0.06$), yielding the highest overall accuracy (**5.32% NME**), outperforming architectures with 3x more parameters.
+3. **3D Facial Depth Recovery:** Despite learning from single 2D monochrome thermal images, the network achieves a Pearson correlation of **$r = 0.9685$** on depth ($z$) regression (nose tip: $z = -0.061$, tragus: $z = +0.119$).
+
+---
+
 ## Quickstart
 
 ### 1. Installation
@@ -91,30 +110,44 @@ Ensure Python 3.10+ and CUDA drivers are configured, then install dependencies:
 pip install -r requirements.txt
 ```
 
-### 2. Training
+### 2. Training Models
 
-Train the baseline MobileNetV2 model on thermal imagery:
+Train with configurable backbone, loss function, and augmentations:
 
 ```bash
-python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --experiment_id EXP-001
+# Baseline MobileNetV2 with Wing Loss (Best Performance - EXP-004)
+python train.py --arch mobilenet_v2 --mode thermal --loss wing --epochs 50 --batch_size 16 --lr 5e-4 --experiment_id EXP-004_wing
+
+# MobileNetV2 with Thermal Photometric Augmentation (EXP-005)
+python train.py --arch mobilenet_v2 --mode thermal --loss smooth_l1 --augment --epochs 50 --batch_size 16 --lr 5e-4 --experiment_id EXP-005_aug
+
+# ResNet-18 Backbone Comparison (EXP-003)
+python train.py --arch resnet18 --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --experiment_id EXP-003
 ```
 
-*Arguments:*
-* `--mode`: Input domain (`thermal` or `rgb`).
-* `--epochs`: Maximum number of training epochs (default: `50`).
-* `--batch_size`: Batch size (default: `16`).
-* `--lr`: Initial learning rate (default: `5e-4`).
-* `--patience`: Early stopping patience (default: `10`).
+### 3. Evaluation & Qualitative Visualization
 
-### 3. Evaluation
-
-Evaluate a saved checkpoint against the independent test set:
+Evaluate any saved checkpoint against the independent test set:
 
 ```bash
-python evaluate.py --checkpoint checkpoints/EXP-001_best.pth --mode thermal
+python evaluate.py --checkpoint checkpoints/EXP-004_wing_best.pth --mode thermal
 ```
 
 Qualitative overlay plots for best and worst predictions are automatically exported to `outputs/predictions/`.
+
+### 4. Real-Time Webcam Demo
+
+Run real-time facial landmark detection directly from your laptop's built-in webcam with live radiometric thermal simulation:
+
+```bash
+python demo_realtime.py --checkpoint checkpoints/EXP-004_wing_best.pth
+```
+
+*Interactive Controls:*
+* `t`: Toggle display mode (Thermal Monochrome $\leftrightarrow$ Ironbow Colormap $\leftrightarrow$ Original RGB).
+* `m`: Toggle landmark density (Dense 478 Mesh $\leftrightarrow$ Key Anatomical Points).
+* `s`: Save instant screenshot to `outputs/screenshots/`.
+* `q`: Quit demo.
 
 ---
 

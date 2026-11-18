@@ -2,8 +2,8 @@
 
 > **Peran:** Optimization, Loss Functions & Data Augmentation Lead  
 > **Fokus Utama:** Eksplorasi Advanced Loss Functions (Wing Loss) (EXP-004), Thermal Data Augmentation (EXP-005), dan Analisis Regresi Kedalaman 3D (Sumbu Z)  
-> **Status:** Siap Dieksekusi  
-> **Terakhir Diperbarui:** 2026-10-14  
+> **Status:** Selesai (Completed - 2026-11-18)  
+> **Terakhir Diperbarui:** 2026-11-18  
 
 ---
 
@@ -37,31 +37,39 @@ Anda bertanggung jawab sebagai **Optimization, Loss Functions & Data Augmentatio
 
 ## 3. Rencana Eksekusi Bertahap (Step-by-Step)
 
-### Tahap 1: Implementasi dan Eksperimen Wing Loss (EXP-004)
-1. Buat file `src/training/losses.py` yang memuat kelas `WingLoss`:
-   * Formula Wing Loss: $w \ln(1 + |x| / \epsilon)$ untuk error kecil, dan $|x| - C$ untuk error besar.
-2. Modifikasi atau tambahkan opsi `--loss wing` pada script training.
-3. Jalankan pelatihan model dengan Wing Loss pada citra termal:
-   ```bash
-   python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-004_wing
-   ```
-4. Evaluasi pada Test Set dan bandingkan metriknya dengan baseline EXP-001 (milik Person 1):
-   * Apakah NME menurun?
-   * Apakah area mata dan bibir memiliki presisi titik yang lebih rapi?
+### Tahap 1: Implementasi dan Eksperimen Wing Loss (EXP-004) [SELESAI - 2026-11-18]
+1. Implementasi `WingLoss` selesai di `src/training/losses.py` sesuai formulasi Feng et al. (CVPR 2018).
+2. Opsi `--loss wing` ditambahkan ke `train.py`.
+3. Model dilatih selama 50 epoch pada citra termal (`checkpoints/EXP-004_wing_best.pth`).
+4. Hasil Evaluasi Kuantitatif Test Set (96 Citra Termal Independen):
+   * **Normalized Mean Error (NME):** **5.32%** (Turun dari baseline 7.98%, peningkatan relatif **+33.33%**)
+   * **Mean Absolute Error (Total):** **0.01265** (Turun dari 0.01896)
+   * **MAE Spasial (XY):** **0.01470** (Turun dari 0.02249, perbaikan **+34.64%**)
+   * **MAE Kedalaman (Z):** **0.00857** (Turun dari 0.01191, perbaikan **+28.04%**)
+   * **Mean Squared Error (MSE):** **0.000903** (Turun dari 0.001200)
+   * **Status:** Melampaui performa seluruh model terdahulu, termasuk ResNet-18 (6.95%). Laporan tersimpan di `experiments/EXP-004_loss_report.md`.
 
-### Tahap 2: Implementasi Thermal Data Augmentation (EXP-005)
-1. Tambahkan pipeline augmentasi pada `src/datasets/transforms.py`:
-   * Random contrast & brightness scaling (mensimulasikan variasi suhu lingkungan pada sensor termal).
-   * Random Gaussian blur / noise halus.
-2. Jalankan pelatihan model dengan augmentasi aktif:
-   ```bash
-   python train.py --mode thermal --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-005_aug
-   ```
-3. Evaluasi apakah gap antara Training Loss dan Validation Loss mengecil (membuktikan berkurangnya overfitting).
+### Tahap 2: Implementasi Thermal Data Augmentation (EXP-005) [SELESAI - 2026-11-18]
+1. Modul augmentasi `AugmentedThermalTransform` diimplementasikan pada `src/datasets/transforms.py` (kontras, brightness, gamma radiasi non-linier, sensor Gaussian thermal noise).
+2. Opsi `--augment` ditambahkan ke `train.py`.
+3. Model dilatih selama 50 epoch pada citra termal (`checkpoints/EXP-005_aug_best.pth`).
+4. Hasil Evaluasi Kuantitatif Test Set (96 Citra Termal Independen):
+   * **Normalized Mean Error (NME):** **6.81%** (Turun dari 7.98%, peningkatan relatif **+14.66%**)
+   * **Mean Absolute Error (Total):** **0.01621** (Turun dari 0.01896)
+   * **MAE Spasial (XY):** **0.01907** (Turun dari 0.02249)
+   * **MAE Kedalaman (Z):** **0.01048** (Turun dari 0.01191)
+   * **Mean Squared Error (MSE):** **0.001258**
+   * **Status:** Augmentasi termal terbukti menekan overfitting dan mengungguli arsitektur ResNet-18 tanpa augmentasi. Laporan tersimpan di `experiments/EXP-005_augmentation_report.md`.
 
-### Tahap 3: Analisis Khusus Koordinat Kedalaman 3D (Depth Z)
-1. Analisis metrik `mae_z` dibandingkan dengan `mae_xy`.
-2. Buat visualisasi proyeksi profil samping (side-view) titik landmark 3D untuk melihat estimasi kedalaman wajah.
+### Tahap 3: Analisis Khusus Koordinat Kedalaman 3D (Depth Z) [SELESAI - 2026-11-18]
+1. Skrip analisis anatomis khusus dieksekusi: `src/evaluation/depth_analysis.py`.
+2. Hasil Kuantitatif Sumbu Z:
+   * **Koefisien Korelasi Pearson (r):** **0.9685** (Korelasi linier sangat kuat antara prediksi dan ground truth).
+   * **Ujung Hidung (Nose Tip, Indeks 1):** Rata-rata GT $z = -0.0611$ $\to$ MAE Z hanya **0.00522**.
+   * **Batang Hidung (Nose Bridge, Indeks 6):** Rata-rata GT $z = -0.0317$ $\to$ MAE Z hanya **0.00586**.
+   * **Sudut Bibir (Indeks 61 & 291):** Rata-rata GT $z \approx +0.006$ $\to$ MAE Z **0.0086**.
+   * **Telinga (Tragus, Indeks 234 & 454):** Rata-rata GT $z = +0.119$ $\to$ MAE Z **0.0168**.
+3. Visualisasi profil samping 3D tersimpan di: `outputs/depth_analysis/depth_z_profile_projection.png`.
 
 ---
 

@@ -181,6 +181,7 @@ class Trainer:
                 patience_counter = 0
                 torch.save({
                     "epoch": epoch,
+                    "arch": getattr(self.model, "arch", "mobilenet_v2"),
                     "model_state_dict": self.model.state_dict(),
                     "optimizer_state_dict": self.optimizer.state_dict(),
                     "val_metrics": val_metrics,
@@ -196,6 +197,7 @@ class Trainer:
             # 6. Menyimpan state terakhir
             torch.save({
                 "epoch": epoch,
+                "arch": getattr(self.model, "arch", "mobilenet_v2"),
                 "model_state_dict": self.model.state_dict(),
                 "optimizer_state_dict": self.optimizer.state_dict(),
                 "val_metrics": val_metrics

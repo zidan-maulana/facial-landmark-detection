@@ -8,7 +8,7 @@ import os
 import torch
 from src.datasets.dataloader import get_dataloaders
 from src.evaluation.metrics import compute_metrics
-from src.models.landmark_detector import MobileNetV2LandmarkDetector
+from src.models.landmark_detector import build_model
 from src.utils.visualizer import render_landmarks_overlay
 
 
@@ -16,8 +16,10 @@ def parse_args():
     """Mendefinisikan argumen baris perintah untuk pengujian."""
     parser = argparse.ArgumentParser(description="Evaluasi Model Facial Landmark Detection pada Test Set")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/EXP-001_best.pth", help="Path file checkpoint bobot model (.pth)")
+    parser.add_argument("--arch", type=str, default="auto", choices=["auto", "mobilenet_v2", "resnet18"], help="Arsitektur model (default: auto)")
     parser.add_argument("--mode", type=str, default="thermal", choices=["thermal", "rgb"], help="Domain input citra uji (default: thermal)")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size evaluasi (default: 16)")
+    parser.add_argument("--prefix", type=str, default="", help="Prefix nama file output visualisasi")
     parser.add_argument("--save_visuals", action="store_true", default=True, help="Simpan visualisasi overlay hasil prediksi")
     return parser.parse_args()
 
@@ -46,8 +48,16 @@ def main():
     if not os.path.exists(args.checkpoint):
         raise FileNotFoundError(f"Checkpoint tidak ditemukan: {args.checkpoint}")
 
-    model = MobileNetV2LandmarkDetector(num_landmarks=478, pretrained=False)
     checkpoint = torch.load(args.checkpoint, map_location=device)
+    
+    # Deteksi arsitektur model
+    if args.arch == "auto":
+        arch = checkpoint.get("arch", "mobilenet_v2")
+    else:
+        arch = args.arch
+    print(f"Memuat Arsitektur Model: {arch}")
+
+    model = build_model(arch=arch, num_landmarks=478, pretrained=False)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
     model.eval()
@@ -103,7 +113,8 @@ def main():
                 img_path = os.path.join("dataset/raw/P1", sample_key)
 
             label = "Best" if rank < 3 else "Worst"
-            save_name = f"test_{label}_{rank+1}_{sample_key}"
+            prefix_str = f"{args.prefix}_" if args.prefix else ""
+            save_name = f"{prefix_str}test_{label}_{rank+1}_{sample_key}"
             save_path = os.path.join(output_dir, save_name)
 
             render_landmarks_overlay(

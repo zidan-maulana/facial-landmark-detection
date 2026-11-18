@@ -2,8 +2,8 @@
 
 > **Peran:** Domain Adaptation & Cross-Domain Research Lead  
 > **Fokus Utama:** Analisis Kesenjangan Domain (Cross-Domain Gap Analysis: RGB vs Thermal) — Sesuai Paper Flotho et al. (2024) (EXP-002)  
-> **Status:** Siap Dieksekusi  
-> **Terakhir Diperbarui:** 2026-10-14  
+> **Status:** Selesai (Completed - 2026-11-18)  
+> **Terakhir Diperbarui:** 2026-11-18  
 
 ---
 
@@ -38,34 +38,38 @@ Anda bertanggung jawab sebagai **Domain Adaptation & Cross-Domain Research Lead*
 
 ## 3. Rencana Eksekusi Bertahap (Step-by-Step)
 
-### Tahap 1: Melatih Model pada Domain RGB (FaceSynthetics P1)
+### Tahap 1: Melatih Model pada Domain RGB (FaceSynthetics P1) [SELESAI - 2026-11-18]
 1. Jalankan pelatihan model MobileNetV2 menggunakan data RGB:
    ```bash
    python train.py --mode rgb --epochs 50 --batch_size 16 --lr 5e-4 --patience 10 --experiment_id EXP-002_rgb
    ```
 2. Uji performa model pada data uji aslinya (RGB Test Set) sebagai kontrol:
    ```bash
-   python evaluate.py --checkpoint checkpoints/EXP-002_rgb_best.pth --mode rgb --batch_size 16
+   python evaluate.py --checkpoint checkpoints/EXP-002_rgb_best.pth --mode rgb --prefix exp002_rgb_native --batch_size 16
    ```
+   * Hasil: NME = **6.25%**, MAE = **0.01523**, MSE = **0.000583**.
 
-### Tahap 2: Pengujian Lintas Domain (Cross-Domain Test)
+### Tahap 2: Pengujian Lintas Domain (Cross-Domain Test) [SELESAI - 2026-11-18]
 1. Uji model hasil latihan RGB tersebut langsung ke citra termal (Thermal Test Set):
    ```bash
-   python evaluate.py --checkpoint checkpoints/EXP-002_rgb_best.pth --mode thermal --batch_size 16
+   python evaluate.py --checkpoint checkpoints/EXP-002_rgb_best.pth --mode thermal --prefix exp002_cross_thermal --batch_size 16
    ```
-2. Ambil hasil evaluasi model latih termal (EXP-001 dari Person 1) yang diuji pada Thermal Test Set.
+   * Hasil: NME melonjak drastis ke **42.57%**, MAE = **0.09795**, MSE = **0.016060** (terjadi degradasi katastropik).
+2. Bandingkan dengan hasil model latih termal (EXP-001 dari Person 1):
+   * Hasil EXP-001 pada citra termal: NME = **7.98%**, MAE = **0.01896**, MSE = **0.001200**.
 
-### Tahap 3: Penyusunan Analisis Kesenjangan Domain (Domain Gap Matrix)
-Buat tabel perbandingan di `experiments/EXP-002_domain_gap_report.md`:
+### Tahap 3: Matriks Analisis Kesenjangan Domain (Domain Gap Matrix) [SELESAI]
+Laporan lengkap tersimpan di `experiments/EXP-002_domain_gap_report.md`:
 
-| Skenario Pengujian | Domain Latih | Domain Uji | Test NME (%) | Test MAE (Total) | Keterangan |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Skenario A (Native RGB)** | RGB (P1) | RGB (P1) | *...* | *...* | Performa ideal di domain RGB |
-| **Skenario B (Cross-Domain)** | RGB (P1) | Thermal (T-FAKE) | *...* | *...* | Terjadi lonjakan error (Domain Gap) |
-| **Skenario C (Native Thermal)** | Thermal (T-FAKE) | Thermal (T-FAKE) | *...* | *...* | Model beradaptasi dengan domain termal |
+| Skenario Pengujian | Domain Latih | Domain Uji | Test NME (%) | Test MAE (Total) | Test MSE | Keterangan / Analisis |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Skenario A (Native RGB)** | RGB (P1) | RGB (P1) | **6.25%** | **0.01523** | **0.000583** | Kontrol ideal pada citra RGB tampak |
+| **Skenario B (Cross-Domain)** | RGB (P1) | Thermal (T-FAKE) | **42.57%** | **0.09795** | **0.016060** | Terjadi lonjakan error parah (Domain Gap) |
+| **Skenario C (Native Thermal)** | Thermal (T-FAKE) | Thermal (T-FAKE) | **7.98%** | **0.01896** | **0.001200** | T-FAKE berhasil menutup celah domain |
 
-Hitung persentase peningkatan performa:
-$$\text{Perbaikan Akurasi} = \frac{\text{NME (Skenario B)} - \text{NME (Skenario C)}}{\text{NME (Skenario B)}} \times 100\%$$
+Tingkat pemulihan akurasi oleh dataset T-FAKE:
+$$\text{Perbaikan Akurasi} = \frac{42.57\% - 7.98\%}{42.57\%} \times 100\% = \mathbf{81.25\%}$$
+(Mencapai **83.67%** jika dibandingkan dengan arsitektur ResNet-18 EXP-003).
 
 ---
 

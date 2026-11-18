@@ -36,6 +36,10 @@ dataset/raw/
 # Model Checkpoints (Heavy Binary Weights)
 checkpoints/*.pth
 
+# Generated Predictions & Screenshots
+outputs/predictions/
+outputs/screenshots/
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 

@@ -1,0 +1,58 @@
+{
+  "checkpoint": "checkpoints/EXP-004_wing_best.pth",
+  "mae_z_total": 0.00856755767017603,
+  "pearson_correlation": 0.9684659554294458,
+  "features": {
+    "Nose Tip (Ujung Hidung)": {
+      "idx": 1,
+      "mae_z": 0.005222732666879892,
+      "mean_gt_z": -0.061110567301511765
+    },
+    "Nose Bridge (Batang Hidung)": {
+      "idx": 6,
+      "mae_z": 0.00585540384054184,
+      "mean_gt_z": -0.03165889158844948
+    },
+    "Forehead Top (Dahi Atas)": {
+      "idx": 10,
+      "mae_z": 0.013730965554714203,
+      "mean_gt_z": -0.016692716628313065
+    },
+    "Chin (Dagu)": {
+      "idx": 152,
+      "mae_z": 0.013063035905361176,
+      "mean_gt_z": 0.014085297472774982
+    },
+    "Left Eye Outer (Sudut Luar Mata Kiri)": {
+      "idx": 33,
+      "mae_z": 0.010925836861133575,
+      "mean_gt_z": 0.01576041243970394
+    },
+    "Right Eye Outer (Sudut Luar Mata Kanan)": {
+      "idx": 263,
+      "mae_z": 0.009971571154892445,
+      "mean_gt_z": 0.01894950680434704
+    },
+    "Mouth Left (Sudut Bibir Kiri)": {
+      "idx": 61,
+      "mae_z": 0.008578062988817692,
+      "mean_gt_z": 0.0045742192305624485
+    },
+    "Mouth Right (Sudut Bibir Kanan)": {
+      "idx": 291,
+      "mae_z": 0.008766270242631435,
+      "mean_gt_z": 0.007133068982511759
+    },
+    "Left Ear / Tragus (Telinga Kiri)": {
+      "idx": 234,
+      "mae_z": 0.01656576246023178,
+      "mean_gt_z": 0.11627862602472305
+    },
+    "Right Ear / Tragus (Telinga Kanan)": {
+      "idx": 454,
+      "mae_z": 0.01703554205596447,
+      "mean_gt_z": 0.12202521413564682
+    }
+  },
+  "plot_path": "outputs/depth_analysis\\depth_z_profile_projection.png"
+}
