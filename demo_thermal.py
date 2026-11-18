@@ -185,11 +185,13 @@ def main():
                 pred = model(tensor)[0].cpu().numpy()  # Shape: (478, 3)
             latency_ms = (time.perf_counter() - t0) * 1000.0
 
-            # 6. Hitung Metrik NME Sampel (Jika Ground Truth Tersedia)
+            # 6. Hitung Metrik NME Sampel (Sesuai Standar Proyek: Diagonal Bounding Box Wajah)
             gt = ground_truths.get(cur_sample_name)
             sample_nme = None
             if gt is not None:
-                d_norm = np.linalg.norm(gt[33, :2] - gt[263, :2])
+                min_xy = np.min(gt[:, :2], axis=0)
+                max_xy = np.max(gt[:, :2], axis=0)
+                d_norm = np.linalg.norm(max_xy - min_xy)  # Diagonal bounding box wajah
                 if d_norm > 1e-6:
                     sample_nme = np.mean(np.linalg.norm(pred[:, :2] - gt[:, :2], axis=1)) / d_norm * 100.0
 
