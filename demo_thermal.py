@@ -91,6 +91,10 @@ def main():
             "name": "EXP-003: ResNet-18 (Deep Residual)",
             "path": "checkpoints/EXP-003_best.pth"
         },
+        "exp005_aug": {
+            "name": "EXP-005: MobileNetV2 (Thermal Augmentation)",
+            "path": "checkpoints/EXP-005_aug_best.pth"
+        },
         "exp002_cross": {
             "name": "EXP-002: MobileNetV2 RGB (Bukti Domain Gap)",
             "path": "checkpoints/EXP-002_rgb_best.pth"
