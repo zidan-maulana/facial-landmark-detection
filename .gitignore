@@ -36,9 +36,16 @@ dataset/raw/
 # Model Checkpoints (Heavy Binary Weights)
 checkpoints/*.pth
 
+# Face Detection Model (Binary)
+models/*.onnx
+
 # Generated Predictions & Screenshots
 outputs/predictions/
 outputs/screenshots/
+
+# Debug & Test Images (Privasi — Jangan push gambar wajah pengguna)
+outputs/debug_*
+outputs/test_*
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
